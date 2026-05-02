@@ -3,7 +3,6 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
 <title>MSDS HSE Library</title>
 
 <style>
@@ -28,11 +27,11 @@ body {
     justify-content: center;
     background: white;
     padding: 10px;
-    font-size: 14px;
 }
 
-.legend span {
-    margin: 5px 10px;
+.legend img {
+    width: 30px;
+    margin: 5px;
 }
 
 /* SEARCH */
@@ -47,36 +46,44 @@ body {
     padding: 10px;
 }
 
-/* CONTAINER */
+/* ✅ GRID VIEW */
 .container {
-    max-width: 700px;
-    margin: auto;
-    padding: 10px;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 12px;
+    padding: 15px;
 }
 
+/* CARD */
 .card {
     background: white;
-    margin: 8px 0;
-    padding: 10px;
     border-radius: 10px;
-    border-left: 8px solid #3498db; /* default */
+    padding: 10px;
+    border-left: 8px solid #3498db;
 }
 
 /* BUTTON */
 button {
     width: 100%;
     padding: 12px;
-    font-size: 14px;
     border: none;
     border-radius: 8px;
     background: #2a5298;
     color: white;
+    font-size: 13px;
     cursor: pointer;
 }
 
-button:hover {
-    opacity: 0.9;
+/* ICONS ROW */
+.icon-row {
+    margin-bottom: 5px;
 }
+
+.icon-row img {
+    width: 22px;
+    margin-right: 4px;
+}
+
 </style>
 </head>
 
@@ -89,12 +96,12 @@ button:hover {
 
 <!-- ✅ LEGEND -->
 <div class="legend">
-    <span title="Flammable">🔥 Flammable</span>
-    <span title="Gas under pressure">🧯 Gas</span>
-    <span title="Health hazard">☣️ Health</span>
-    <span title="Environmental hazard">🌍 Environment</span>
-    <span title="Oxidizer">⚠️ Oxidizer</span>
-    <span title="Corrosive">🧪 Corrosive</span>
+    <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/7/73/GHS-pictogram-flamme.svg/100px-GHS-pictogram-flamme.svg.png" title="Flammable">
+    <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/3/3b/GHS-pictogram-gas.svg/100px-GHS-pictogram-gas.svg.png" title="Gas under pressure">
+    <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/9/99/GHS-pictogram-silhouette.svg/100px-GHS-pictogram-silhouette.svg.png" title="Health hazard">
+    <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/0/0a/GHS-pictogram-pollu.svg/100px-GHS-pictogram-pollu.svg.png" title="Environmental hazard">
+    <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/7/7d/GHS-pictogram-oxid.svg/100px-GHS-pictogram-oxid.svg.png" title="Oxidizer">
+    <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/a/a1/GHS-pictogram-acid.svg/100px-GHS-pictogram-acid.svg.png" title="Corrosive">
 </div>
 
 <div class="search">
@@ -105,30 +112,28 @@ button:hover {
 
 <script>
 
-// ✅ ✅ GOOGLE SHEET CSV LINK
+// ✅ YOUR CSV LINK
 const sheetURL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vSSksGapM9TAjh1gbpm6JxtidPcA9XD2gwT40anhDJCfSys4xqlNKTAZIBnuxVBzgpNZWyvMvhAWjrA/pub?gid=0&single=true&output=csv";
 
 let dataList = [];
 
-// ✅ ICON MAP
-const icons = {
-    "flammable": "🔥",
-    "gas under pressure": "🧯",
-    "health hazard": "☣️",
-    "environmental hazard": "🌍",
-    "oxidizer": "⚠️",
-    "oxidizing": "⚠️",
-    "corrosive": "🧪"
+// ✅ GHS ICONS MAP
+const ghsIcons = {
+    "flammable": "https://upload.wikimedia.org/wikipedia/commons/thumb/7/73/GHS-pictogram-flamme.svg/100px-GHS-pictogram-flamme.svg.png",
+    "gas": "https://upload.wikimedia.org/wikipedia/commons/thumb/3/3b/GHS-pictogram-gas.svg/100px-GHS-pictogram-gas.svg.png",
+    "health": "https://upload.wikimedia.org/wikipedia/commons/thumb/9/99/GHS-pictogram-silhouette.svg/100px-GHS-pictogram-silhouette.svg.png",
+    "environment": "https://upload.wikimedia.org/wikipedia/commons/thumb/0/0a/GHS-pictogram-pollu.svg/100px-GHS-pictogram-pollu.svg.png",
+    "oxidizer": "https://upload.wikimedia.org/wikipedia/commons/thumb/7/7d/GHS-pictogram-oxid.svg/100px-GHS-pictogram-oxid.svg.png",
+    "corrosive": "https://upload.wikimedia.org/wikipedia/commons/thumb/a/a1/GHS-pictogram-acid.svg/100px-GHS-pictogram-acid.svg.png"
 };
 
-// ✅ SEVERITY COLOR
-function getColor(hazards) {
-    let txt = hazards.toLowerCase();
-
-    if (txt.includes("flammable")) return "#e74c3c";  // red
-    if (txt.includes("oxidizer")) return "#f39c12";  // orange
-    if (txt.includes("corrosive")) return "#8e44ad"; // purple
-    return "#3498db"; // default
+// ✅ COLOR PRIORITY
+function getColor(text) {
+    text = text.toLowerCase();
+    if (text.includes("flammable")) return "#e74c3c";
+    if (text.includes("oxidizer")) return "#f39c12";
+    if (text.includes("corrosive")) return "#8e44ad";
+    return "#3498db";
 }
 
 // ✅ LOAD DATA
@@ -159,7 +164,7 @@ fetch(sheetURL)
     display(dataList);
 });
 
-// ✅ DISPLAY
+// ✅ DISPLAY GRID
 function display(list) {
 
     let container = document.getElementById("list");
@@ -169,23 +174,20 @@ function display(list) {
 
         let card = document.createElement("div");
         card.className = "card";
-
-        // ✅ border color
         card.style.borderLeftColor = getColor(item.hazards);
 
-        // ✅ icons
-        let iconList = "";
-        item.hazards.split(",").forEach(h => {
-            let key = h.trim().toLowerCase();
-            if (icons[key]) {
-                iconList += `<span title="${h.trim()}">${icons[key]}</span> `;
-            }
-        });
+        // ✅ MULTIPLE ICONS FIXED
+        let iconsHTML = "";
+        let hazardsArr = item.hazards.toLowerCase().split(",");
 
-        let btn = document.createElement("button");
-        btn.innerHTML = iconList + item.name;
+        hazardsArr.forEach(h => {
 
-        btn.onclick = () => {
+            let text = h.trim();
+
+            Object.keys(ghsIcons).forEach(key => {
+
+                if (text.includes(key)) {
+                    iconsHTML += `<img src="${ghsIcons[key]}" title="${text.onclick = () => {
             if (item.url) window.open(item.url, "_blank");
             else alert("MSDS not available");
         };
