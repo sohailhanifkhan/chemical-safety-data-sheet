@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>MSDS HSE Library</title>
+
+<style>
+body {
+    font-family: Arial;
+    margin: 0;
+    background: #eef2f7;
+}
+
+/* HEADER */
+.header {
+    background: linear-gradient(135deg, #1e3c72, #2a5298);
+    color: white;
+    padding: 20px;
+    text-align: center;
+}
+
+/* LEGEND */
+.legend {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    background: white;
+    padding: 10px;
+    font-size: 14px;
+}
+
+.legend span {
+    margin: 5px 10px;
+}
+
+/* SEARCH */
+.search {
+    text-align: center;
+    margin: 10px;
+}
+
+.search input {
+    width: 90%;
+    max-width: 500px;
+    padding: 10px;
+}
+
+/* CONTAINER */
+.container {
+    max-width: 700px;
+    margin: auto;
+    padding: 10px;
+}
+
+.card {
+    background: white;
+    margin: 8px 0;
+    padding: 10px;
+    border-radius: 10px;
+    border-left: 8px solid #3498db; /* default */
+}
+
+/* BUTTON */
+button {
+    width: 100%;
+    padding: 12px;
+    font-size: 14px;
+    border: none;
+    border-radius: 8px;
+    background: #2a5298;
+    color: white;
+    cursor: pointer;
+}
+
+button:hover {
+    opacity: 0.9;
+}
+</style>
+</head>
+
+<body>
+
+<div class="header">
+    <h2>MSDS HSE Library</h2>
+    <p>Scan & Access Safety Data Sheets</p>
+</div>
+
+<!-- ✅ LEGEND -->
+<div class="legend">
+    <span title="Flammable">🔥 Flammable</span>
+    <span title="Gas under pressure">🧯 Gas</span>
+    <span title="Health hazard">☣️ Health</span>
+    <span title="Environmental hazard">🌍 Environment</span>
+    <span title="Oxidizer">⚠️ Oxidizer</span>
+    <span title="Corrosive">🧪 Corrosive</span>
+</div>
+
+<div class="search">
+    <input type="text" id="search" placeholder="Search..." onkeyup="filterData()">
+</div>
+
+<div class="container" id="list"></div>
+
+<script>
+
+// ✅ ✅ GOOGLE SHEET CSV LINK
+const sheetURL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vSSksGapM9TAjh1gbpm6JxtidPcA9XD2gwT40anhDJCfSys4xqlNKTAZIBnuxVBzgpNZWyvMvhAWjrA/pub?gid=0&single=true&output=csv";
+
+let dataList = [];
+
+// ✅ ICON MAP
+const icons = {
+    "flammable": "🔥",
+    "gas under pressure": "🧯",
+    "health hazard": "☣️",
+    "environmental hazard": "🌍",
+    "oxidizer": "⚠️",
+    "oxidizing": "⚠️",
+    "corrosive": "🧪"
+};
+
+// ✅ SEVERITY COLOR
+function getColor(hazards) {
+    let txt = hazards.toLowerCase();
+
+    if (txt.includes("flammable")) return "#e74c3c";  // red
+    if (txt.includes("oxidizer")) return "#f39c12";  // orange
+    if (txt.includes("corrosive")) return "#8e44ad"; // purple
+    return "#3498db"; // default
+}
+
+// ✅ LOAD DATA
+fetch(sheetURL)
+.then(res => res.text())
+.then(csv => {
+
+    let rows = csv.split("\n").slice(1);
+
+    rows.forEach(row => {
+
+        if (!row.trim()) return;
+
+        let cols = row.match(/(".*?"|[^",]+)(?=\s*,|\s*$)/g);
+        if (!cols || cols.length < 2) return;
+
+        let name = cols[0].replace(/"/g, "").trim();
+        let url = cols[1].replace(/"/g, "").trim();
+        let hazards = cols[2] ? cols[2].replace(/"/g, "").trim() : "";
+
+        if (url.includes("drive.google.com")) {
+            url = url.replace("/view", "/preview");
+        }
+
+        dataList.push({ name, url, hazards });
+    });
+
+    display(dataList);
+});
+
+// ✅ DISPLAY
+function display(list) {
+
+    let container = document.getElementById("list");
+    container.innerHTML = "";
+
+    list.forEach(item => {
+
+        let card = document.createElement("div");
+        card.className = "card";
+
+        // ✅ border color
+        card.style.borderLeftColor = getColor(item.hazards);
+
+        // ✅ icons
+        let iconList = "";
+        item.hazards.split(",").forEach(h => {
+            let key = h.trim().toLowerCase();
+            if (icons[key]) {
+                iconList += `<span title="${h.trim()}">${icons[key]}</span> `;
+            }
+        });
+
+        let btn = document.createElement("button");
+        btn.innerHTML = iconList + item.name;
+
+        btn.onclick = () => {
+            if (item.url) window.open(item.url, "_blank");
+            else alert("MSDS not available");
+        };
+
+        card.appendChild(btn);
+        container.appendChild(card);
+    });
+}
+
+// ✅ SEARCH
+function filterData() {
+
+    let txt = document.getElementById("search").value.toLowerCase();
+
+    let filtered = dataList.filter(item =>
+        item.name.toLowerCase().includes(txt)
+    );
+
+    display(filtered);
+}
+
+</script>
+
+</body>
+</html>
